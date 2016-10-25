@@ -9,10 +9,6 @@ from CellData import Category
 class Spreadsheet(object):
     #each line is a category to find
     #make different regex algorithms based on spreadsheet type
-
-    #break these up into individual regex's in a list.
-    #then use the list index to determine what is being stored
-    #for the order
     regex_category = [] #stores the names of each category
 
     regex = [] #stores each regex category individually
@@ -71,8 +67,7 @@ class Spreadsheet(object):
         if cell_str is not None: #cell has a value
             for i in range( len(Spreadsheet.regex) ):
                 if Spreadsheet.regex[i].fullmatch( str(cell_str) ) is not None:
-                    print( Spreadsheet.regex_category[i] )
-                    return i #index
+                    return i #index of category found
 
             return None
 
@@ -187,4 +182,5 @@ class Spreadsheet(object):
 
     def print_orders(self):
         for i in range( len(self.orders) ):
-            print( self.orders[i], end='---------------------\n\n')
+            ending = '\n' + ('_' * 40) + '\n\n'
+            print( self.orders[i], end= ending)

@@ -36,6 +36,6 @@ class Order(object):
                + str(self.phone_number) + '\n' + str(self.email)
 
         for key, val in self.product_and_qty.items():
-            info = info + '\n' + str(key) + '\n' + str(val) + '\n'
+            info = info + '\n' + str(key) + '\n' + str(val)
 
         return info
