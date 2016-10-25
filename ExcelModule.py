@@ -36,14 +36,14 @@ class Spreadsheet(object):
     regex.append( re.compile(r'^(\s* email \s*)$', re.I | re.X) )
     regex_category.append('email')
 
-    regex.append( re.compile(r'^(\s* qty \s* \d* \s*)$', re.I | re.X) )
+    regex.append( re.compile(r'^(\s* (qty | quantity) \s* \d* \s*)$', re.I | re.X) )
     regex_category.append('quantity')
 
     regex.append( re.compile(r'^(\s* product \s* \d* \s*)$', re.I | re.X) )
     regex_category.append('product')
 
-    regex.append( re.compile(r'^(\s* product (\s*|\w*) \d* \s* \
-                              (qty | quantity) (\s* | \w*) \d* \s*)$') )
+    regex.append( re.compile(r'''^(\s* product (\s*|\w*) \d* \s*
+                              (qty | quantity) (\s* | \w*) \d* \s*)$''', re.I | re.X) )
     regex_category.append('product and quantity')
 
     def __init__(self, wb_string):
@@ -85,11 +85,11 @@ class Spreadsheet(object):
                 if category_index is not None: #cell is a category
                     category_obj = Category(Spreadsheet.regex_category[category_index], self.category_row, col) #stores current row & column
                     cell_pos = '{0}'.format(get_column_letter(col))
-
                     #format category column letter : category object
                     self.order_categories[cell_pos] = category_obj
 
         self.num_of_categories = len( self.order_categories )
+        print('number of categories:' + str(self.num_of_categories) )
         return None
 
 
@@ -123,60 +123,57 @@ class Spreadsheet(object):
             current_qty = None
             current_order = Order() #reset
 
-            for key, val in self.order_categories.items():
-                cell_val = self.ws.cell(row = row, column = val.column).value
+            #for key, val in self.order_categories.items(): #goes through each category for the order
+            for col in range(1, self.num_of_categories + 2): #+2 accounts for cells starting at 1, and range() not going to the upper bound
+                cell_val = self.ws.cell(row = row, column = col).value
 
                 if cell_val is not None: #the cell has a value
-                    if get_column_letter(val.column) in self.order_categories.keys(): #if the key exists
-                        if self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[0]:
+                    if get_column_letter(col) in self.order_categories.keys(): #if the key exists
+                        if self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[0]:
                             current_order.first_name = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[1]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[1]:
                             current_order.last_name = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[2]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[2]:
                             current_order.company = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[3]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[3]:
                             if current_order.address_1 is None:
                                 current_order.address_1 = cell_val
 
                             else:
                                 current_order.address_2 = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[4]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[4]:
                             current_order.city = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[5]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[5]:
                             current_order.state = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[6]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[6]:
                             current_order.zip = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[7]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[7]:
                             current_order.email = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[8]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[8]:
                             current_qty = cell_val
-                            #current_order.quantity = cell_val
 
-                        elif self.order_categories[ get_column_letter(val.column) ].name == Spreadsheet.regex_category[9]:
+                        elif self.order_categories[ get_column_letter(col) ].name == Spreadsheet.regex_category[9]:
                             current_product = cell_val
-                            #current_order.product = cell_val
 
                         if current_product is not None and current_qty is not None:
                             current_order.product_and_qty[current_product] = current_qty
+                            print('Product: {0}  Qty: {1} (Added)'.format(current_product, current_qty) )
                             current_product = None #reset
                             current_qty = None #reset
-                            print('added product')
 
                         val_exists = True
-                        #print( cell_val )
 
             if val_exists:
                 self.orders.append(current_order)
-                #print(current_order)
-                #print('_' * 35, end='\n\n')
+                print()
 
         return None
 

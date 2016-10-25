@@ -8,7 +8,7 @@ def main():
     order_sheet = Spreadsheet('spring_mobile_mod.xlsx')
     order_sheet.find_category_row()
     order_sheet.get_orders()
-    order_sheet.print_orders()
+    #order_sheet.print_orders()
 
     return None
 
